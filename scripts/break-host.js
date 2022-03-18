@@ -13,5 +13,12 @@ export async function main(ns) {
     ns.relaysmtp(target);
   }
 
+  if (ns.fileExists("HTTPworm.exe", "home")) {
+    ns.httpworm(target);
+  }
+
+  if (ns.fileExists("SQLInject.exe", "home")) {
+    ns.sqlinject(target);
+  }
   ns.nuke(target);
 }
