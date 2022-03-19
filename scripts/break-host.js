@@ -21,4 +21,5 @@ export async function main(ns) {
     ns.sqlinject(target);
   }
   ns.nuke(target);
+  ns.exec('deploy.js', 'home', 1, target)
 }
