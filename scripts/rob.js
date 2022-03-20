@@ -5,8 +5,8 @@ export async function main(ns) {
   while (true) {
     var hack_time = ns.getHackTime(target)
 
-    ns.exec("hack.js", "home", 10, target)
-    await ns.sleep(hack_time + 1000)
+    ns.exec("hack.js", ns.getHostname(), ns.args[1], target)
+    await ns.sleep(hack_time)
   }
 
   ns.toast("Super hack is done.", "success")
