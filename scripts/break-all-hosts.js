@@ -1,77 +1,58 @@
+/** @param {NS} ns **/
 export async function main(ns) {
-  var hostList = [
-    "4sigma",
-    "aerocorp",
-    "aevum-police",
-    "alpha-ent",
-    "applied-energetics",
-    "avmnite-02h",
-    "b-and-a",
-    "blade",
-    "catalyst",
-    "clarkinc",
-    "computek",
-    "crush-fitness",
-    "CSEC",
-    "darkweb",
-    "defcomm",
-    "deltaone",
-    "ecorp",
-    "foodnstuff",
-    "fulcrumassets",
-    "fulcrumtech",
-    "galactic-cyber",
-    "global-pharm",
-    "harakiri-sushi",
-    "helios",
-    "hong-fang-tea",
-    "icarus",
-    "infocomm",
-    "I.I.I.I",
-    "iron-gym",
-    "joesguns",
-    "johnson-ortho",
-    "kuai-gong",
-    "lexo-corp",
-    "max-hardware",
-    "megacorp",
-    "microdyne",
-    "millenium-fitness",
-    "n00dles",
-    "nectar-net",
-    "neo-net",
-    "netlink",
-    "nova-med",
-    "nwo",
-    "omega-net",
-    "omnia",
-    "omnitek",
-    "phantasy",
-    "powerhouse-fitness",
-    "rho-construction",
-    "rothman-uni",
-    "run4theh111z",
-    "sigma-cosmetics",
-    "silver-helix",
-    "snap-fitness",
-    "solaris",
-    "stormtech",
-    "summit-uni",
-    "syscore",
-    "taiyang-digital",
-    "The-Cave",
-    "the-hub",
-    "titan-labs",
-    "unitalife",
-    "univ-energy",
-    "vitalife",
-    "zb-def",
-    "zb-institute",
-    "zer0",
-    "zeus-med",
-  ]
+  ns.disableLog("ALL")
 
-  for (var i in hostList) {
-    ns.exec("break-host.js", "home", 1, hostList[i])
+  var files = ns.ls("home", ".js")
+  var hosts = getAllHosts(ns)
+  for (var i in hosts) {
+    breakHost(ns, hosts[i])
+    await ns.scp(files, hosts[i])
   }
+}
+
+async function breakHost(ns, target) {
+  if (ns.fileExists("BruteSSH.exe", "home")) {
+    ns.brutessh(target);
+  }
+
+  if (ns.fileExists("FTPCrack.exe", "home")) {
+    ns.ftpcrack(target);
+  }
+
+  if (ns.fileExists("relaySMTP.exe", "home")) {
+    ns.relaysmtp(target);
+  }
+
+  if (ns.fileExists("HTTPworm.exe", "home")) {
+    ns.httpworm(target);
+  }
+
+  if (ns.fileExists("SQLInject.exe", "home")) {
+    ns.sqlinject(target);
+  }
+  try {
+    ns.nuke(target);
+    ns.tprint(`nuked ${target}`)
+  } catch {
+    ns.tprint(`Couldn't nuke ${target}`)
+  }
+}
+
+function getAllHosts(ns) {
+  var hostList = ['home']
+
+  while (true) {
+    var startingLength = hostList.length
+    hostList.forEach(function (value, index, array) {
+      hostList = hostList.concat(ns.scan(value)).filter(onlyUnique)
+    })
+    if (hostList.length == startingLength) {
+      break
+    }
+  }
+  return hostList
+}
+
+function onlyUnique(value, index, self) {
+  return self.indexOf(value) === index;
 }

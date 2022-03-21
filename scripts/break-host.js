@@ -20,6 +20,10 @@ export async function main(ns) {
   if (ns.fileExists("SQLInject.exe", "home")) {
     ns.sqlinject(target);
   }
-  ns.nuke(target);
+  try {
+    ns.nuke(target);
+  } catch {
+    ns.print(`Couldn't nuke ${target}`)
+  }
   ns.exec('deploy.js', 'home', 1, target)
 }

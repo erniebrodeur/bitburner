@@ -1,40 +1,54 @@
-/** @param {NS} ns **/
-export async function main(ns) {
-  // parse flags for
-  // -m [max_thread_count]
-  // -a, --all for all scanable hosts
+function callScript(ns, script, host, target, time) {
+  var ramCost = ns.getScriptRam(script, host)
+  var maxRam = ns.getServerMaxRam(host)
+  var usedRam = ns.getServerUsedRam(host)
+  var freeRam = maxRam - usedRam
+  var threadCount = Math.floor(freeRam / ramCost)
 
-  // [target]
-  // for the main function we need to:
-  // - profile server
-  // - determine if we weaken, grow, or hack
-  // - if getMinSecurity + buffer > threshold --> weaken
-  // - elsif getMaxMoney > getCurrentMoney
-  // - else hack
-  // - calculate max threads
-  // - calculate one cycle of grow
-  // - calculate one cycle of hack
-  // - if the function is hack
-  //   - don't use more than what you can get in one cycle of grow
-  // - if the function is grow
-  //   - don't use more than what you get for getMaxMoney()
-  // - if the function is weaken
-  //   - don't use more than what you get for getMinSecurity()
+  if (threadCount == 0) {
+    ns.print(`--- current script: ${script} not enough RAM for even a single thread.`)
+    ns.sleep(100);
+  }
+  ns.print(`--- current script: ${script}, time to complete: ${(time / 1000).toFixed(2)} seconds, thread count: ${threadCount}`)
+  ns.exec(script, host, threadCount, target)
+
+  return time
 }
 
-//getScriptRam(script, host)
-//growthAnalyze(host, growthAmount, cores)	Calculate the number of grow thread needed to grow a server by a certain multiplier.
-//growthAnalyzeSecurity(threads)	Calculate the security increase for a number of thread.
-//hackAnalyze(host)	Get the part of money stolen with a single thread.
-//hackAnalyzeChance(host)	Get the chance of successfully hacking a server.
-//hackAnalyzeSecurity(threads)	Get the security increase for a number of thread.
-//hackAnalyzeThreads(host, hackAmount)	Predict the effect of hack.
-//weakenAnalyze(threads, cores)
+/** @param {NS} ns **/
+export async function main(ns) {
+  ns.disableLog("ALL")
 
+  var target = ns.args[0];
+  if (!target) {
+    target = "n00dles"
+  }
+  var currentHost = ns.getHostname()
+  var securityThresh = ns.getServerMinSecurityLevel(target) + 10;
+  var currentSecurityLevel = ns.getServerSecurityLevel(target)
+  var moneyThresh = ns.getServerMaxMoney(target) * 0.9;
+  var iteration = 0
 
-/** @param {string} [host = getCurrentHost] gather info in one call, return an object **/
-/** @return { object } details **/
-function profileServer(host) {
-  var return_object = { growth }
+  // getScriptExpGain(script, host, args)	Get the exp gain of a script.
+  //  getScriptIncome(script, host, args)	Get the income of a script.
 
+  while (true) {
+    currentSecurityLevel = ns.getServerSecurityLevel(target)
+    ns.print("---------------------------------")
+    ns.print(`--- current iteration: ${iteration}`)
+    ns.print(`--- current security level: ${currentSecurityLevel.toFixed(2)}`)
+    ns.print(`--- current amount of money: ${ns.getServerMoneyAvailable(target).toFixed(2)}`)
+
+    if (currentSecurityLevel > securityThresh) {
+      await ns.sleep(callScript(ns, "weaken.js", currentHost, target, ns.getWeakenTime(target) + 35))
+    } else if (ns.getServerMoneyAvailable(target) < moneyThresh) {
+      await ns.sleep(callScript(ns, "grow.js", currentHost, target, ns.getGrowTime(target) + 35))
+    } else {
+      await ns.sleep(callScript(ns, "hack.js", currentHost, target, ns.getHackTime(target) + 35))
+    }
+
+    iteration = iteration + 1
+  }
+
+  ns.enableLog("ALL")
 }
