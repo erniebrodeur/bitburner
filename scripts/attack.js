@@ -7,11 +7,10 @@ function callScript(ns, script, host, target, time) {
 
   if (threadCount == 0) {
     ns.print(`--- current script: ${script} not enough RAM for even a single thread.`)
-    ns.sleep(100);
+  } else {
+    ns.print(`--- current script: ${script}, time to complete: ${(time / 1000).toFixed(2)} seconds, thread count: ${threadCount}`)
+    ns.exec(script, host, threadCount, target)
   }
-  ns.print(`--- current script: ${script}, time to complete: ${(time / 1000).toFixed(2)} seconds, thread count: ${threadCount}`)
-  ns.exec(script, host, threadCount, target)
-
   return time
 }
 
@@ -28,9 +27,6 @@ export async function main(ns) {
   var currentSecurityLevel = ns.getServerSecurityLevel(target)
   var moneyThresh = ns.getServerMaxMoney(target) * 0.9;
   var iteration = 0
-
-  // getScriptExpGain(script, host, args)	Get the exp gain of a script.
-  //  getScriptIncome(script, host, args)	Get the income of a script.
 
   while (true) {
     currentSecurityLevel = ns.getServerSecurityLevel(target)
@@ -49,6 +45,4 @@ export async function main(ns) {
 
     iteration = iteration + 1
   }
-
-  ns.enableLog("ALL")
 }
