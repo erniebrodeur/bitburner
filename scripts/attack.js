@@ -7,11 +7,19 @@ function callScript(ns, script, host, target, time) {
 
   if (threadCount == 0) {
     ns.print(`--- current script: ${script} not enough RAM for even a single thread.`)
-  } else {
-    ns.print(`--- current script: ${script}, time to complete: ${(time / 1000).toFixed(2)} seconds, thread count: ${threadCount}`)
-    ns.exec(script, host, threadCount, target)
+    ns.sleep(100);
   }
+  ns.print(`--- current script: ${script}, time to complete: ${(time / 1000).toFixed(2)} seconds, thread count: ${threadCount}`)
+  ns.exec(script, host, threadCount, target)
+
   return time
+}
+
+function toDollar(number) {
+  return number.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD"
+  });
 }
 
 /** @param {NS} ns **/
@@ -28,12 +36,15 @@ export async function main(ns) {
   var moneyThresh = ns.getServerMaxMoney(target) * 0.9;
   var iteration = 0
 
+  // getScriptExpGain(script, host, args)	Get the exp gain of a script.
+  //  getScriptIncome(script, host, args)	Get the income of a script.
+
   while (true) {
     currentSecurityLevel = ns.getServerSecurityLevel(target)
     ns.print("---------------------------------")
     ns.print(`--- current iteration: ${iteration}`)
     ns.print(`--- current security level: ${currentSecurityLevel.toFixed(2)}`)
-    ns.print(`--- current amount of money: ${ns.getServerMoneyAvailable(target).toFixed(2)}`)
+    ns.print(`--- current amount of money: ${toDollar(ns.getServerMoneyAvailable(target))}`)
 
     if (currentSecurityLevel > securityThresh) {
       await ns.sleep(callScript(ns, "weaken.js", currentHost, target, ns.getWeakenTime(target) + 35))

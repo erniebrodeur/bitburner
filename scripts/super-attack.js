@@ -2,7 +2,8 @@
 export async function main(ns) {
   ns.disableLog("ALL")
 
-  var files = ns.ls("home", ".js")
+  // var files = ns.ls("home", ".js")
+  var files = ['attack.js', 'weaken.js', 'grow.js', 'hack.js']
   var hosts = getAllHosts(ns).filter(notHome)
   var hackingTarget = getTarget(ns)
 
@@ -36,6 +37,18 @@ export async function main(ns) {
     ns.exec('attack.js', target, 1, hackingTarget)
   }
 }
+
+
+export function autocomplete(data, args) {
+  return [...data.servers]; // This script autocompletes the list of servers.
+}
+
+// function toDollar() {
+//   return self.toLocaleString("en-US", {
+//     style: "currency",
+//     currency: "USD"
+//   });
+// }
 
 async function breakHostPorts(ns, server) {
   if (!server.sshPortOpen && ns.fileExists("BruteSSH.exe", "home")) {
