@@ -7,19 +7,12 @@ function callScript(ns, script, host, target, time) {
 
   if (threadCount == 0) {
     ns.print(`--- current script: ${script} not enough RAM for even a single thread.`)
-    ns.sleep(100);
+    return time
   }
-  ns.print(`--- current script: ${script}, time to complete: ${(time / 1000).toFixed(2)} seconds, thread count: ${threadCount}`)
+  ns.print(`--- current script: ${script}, time to complete: ${ns.nFormat(time / 1000, '00:00:00')}, thread count: ${threadCount}`)
   ns.exec(script, host, threadCount, target)
 
   return time
-}
-
-function toDollar(number) {
-  return number.toLocaleString("en-US", {
-    style: "currency",
-    currency: "USD"
-  });
 }
 
 /** @param {NS} ns **/
@@ -31,7 +24,7 @@ export async function main(ns) {
     target = "n00dles"
   }
   var currentHost = ns.getHostname()
-  var securityThresh = ns.getServerMinSecurityLevel(target) + 10;
+  var securityThresh = ns.getServerMinSecurityLevel(target) + 1;
   var currentSecurityLevel = ns.getServerSecurityLevel(target)
   var moneyThresh = ns.getServerMaxMoney(target) * 0.9;
   var iteration = 0
@@ -44,14 +37,15 @@ export async function main(ns) {
     ns.print("---------------------------------")
     ns.print(`--- current iteration: ${iteration}`)
     ns.print(`--- current security level: ${currentSecurityLevel.toFixed(2)}`)
-    ns.print(`--- current amount of money: ${toDollar(ns.getServerMoneyAvailable(target))}`)
+    ns.print(`--- current money: ${ns.nFormat(ns.getServerMoneyAvailable(target), '$00.00a')} of ${ns.nFormat(ns.getServerMaxMoney(target), '$00.00a')}`)
+
 
     if (currentSecurityLevel > securityThresh) {
-      await ns.sleep(callScript(ns, "weaken.js", currentHost, target, ns.getWeakenTime(target) + 35))
+      await ns.sleep(callScript(ns, "weaken.js", currentHost, target, ns.getWeakenTime(target) + 100))
     } else if (ns.getServerMoneyAvailable(target) < moneyThresh) {
-      await ns.sleep(callScript(ns, "grow.js", currentHost, target, ns.getGrowTime(target) + 35))
+      await ns.sleep(callScript(ns, "grow.js", currentHost, target, ns.getGrowTime(target) + 100))
     } else {
-      await ns.sleep(callScript(ns, "hack.js", currentHost, target, ns.getHackTime(target) + 35))
+      await ns.sleep(callScript(ns, "hack.js", currentHost, target, ns.getHackTime(target) + 100))
     }
 
     iteration = iteration + 1

@@ -12,7 +12,7 @@ export async function main(ns) {
 
     }
   } else {
-    ns.purchaseServer("a_server", ns.args[0])
+    ns.purchaseServer("a-server", ns.args[0])
   }
 }
 
