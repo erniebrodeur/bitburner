@@ -1,15 +1,20 @@
+import optionParser from './lib/opt-parser'
+
 /** @param {NS} ns **/
 export async function main(ns) {
   ns.disableLog("ALL")
+  let options = optionParser(ns.args)
 
-  // var files = ns.ls("home", ".js")
-  var files = ['attack.js', 'weaken.js', 'grow.js', 'hack.js']
-  var hosts = getAllHosts(ns).filter(notHome)
-  var hackingTarget = getTarget(ns)
+  // let files = ns.ls("home", ".js")
+  let files = ['attack.js', 'weaken.js', 'grow.js', 'hack.js']
+  let hosts = getAllHosts(ns).filter(function (value) {
+    return (value != "home" && (options["with-hack-net"] || !value.startsWith("hacknet")))
+  })
+  let hackingTarget = getTarget(ns, options = {})
 
-  for (var i in hosts) {
-    var target = hosts[i]
-    var server = ns.getServer(target)
+  for (let i in hosts) {
+    let target = hosts[i]
+    let server = ns.getServer(target)
     ns.tprintf(`# ${server.hostname}`)
     if (server.hasAdminRights == false) {
       ns.tprintf(`  does not have root, attempting to break.`)
@@ -43,13 +48,6 @@ export function autocomplete(data, args) {
   return [...data.servers]; // This script autocompletes the list of servers.
 }
 
-// function toDollar() {
-//   return self.toLocaleString("en-US", {
-//     style: "currency",
-//     currency: "USD"
-//   });
-// }
-
 async function breakHostPorts(ns, server) {
   if (!server.sshPortOpen && ns.fileExists("BruteSSH.exe", "home")) {
     ns.tprintf(`  opening SSH port`)
@@ -78,10 +76,10 @@ async function breakHostPorts(ns, server) {
 }
 
 function getAllHosts(ns) {
-  var hostList = ['home']
+  let hostList = ['home']
 
   while (true) {
-    var startingLength = hostList.length
+    let startingLength = hostList.length
     hostList.forEach(function (value) {
       hostList = hostList.concat(ns.scan(value)).filter(onlyUnique)
     })
@@ -96,14 +94,11 @@ function onlyUnique(value, index, self) {
   return self.indexOf(value) === index;
 }
 
-function notHome(value) {
-  return (value != "home")
-}
+function getTarget(ns, options) {
+  let target = "n00dles"
 
-function getTarget(ns) {
-  var target = "n00dles"
-  if (ns.args[0]) {
-    target = ns.args[0]
+  if (options.unparsed) {
+    target = options.unparsed
   }
   return target
 }
