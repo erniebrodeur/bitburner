@@ -1,13 +1,42 @@
 import optionParser from './lib/opt-parser'
+import * as Config from './lib/config'
 
 /** @param {NS} main_ns **/
 export async function main(ns) {
-  let upgradeCoresAt = [10, 12, 13, 14, 18, 22, 24]
-
   while (true) {
-    purchaseUpgrade(ns, findTarget(ns))
+    purchaseUpgrade(ns, findTargetByArray(ns))
+//    ns.tprintf(`${JSON.stringify(findTargetByArray(ns))}`)
     await ns.sleep(10)
   }
+}
+
+function leastProducingNode(ns, nodeList) {
+  // next lets determine our target
+  let sortedList = nodeList.sort(function (a, b) {
+    return a.production - b.production
+  })
+
+  return sortedList[0]
+}
+
+function findTargetByArray(ns) {
+  let nodeList = buildNodeList(ns)
+  let target = leastProducingNode(ns, nodeList)
+
+  target.upgrade = 'level'
+  target.index = target.name.match(/^.*-(\d+)$/)[1]
+
+  for (let levels of Config.UpgradeLevels) {
+    if (target.level == levels[0]) {
+      if (target.ram <= levels[1]) {
+        target.upgrade = 'ram'
+      } else if (target.core <= levels[2]) {
+        target.upgrade = 'core'
+      }
+    }
+  }
+
+  return target
 }
 
 // simple (shitty) method to find the lowest producing -> cheapest upgrade.
@@ -49,6 +78,15 @@ function buildNodeList(ns) {
 }
 
 function purchaseUpgrade(ns, target) {
+  let player = ns.getPlayer()
+  let reserveAmount = 0.0
+  let productionPerSecond = 0.0
+
+  reserveAmount = productionPerSecond * 75
+  for (let node of buildNodeList(ns)) {
+    productionPerSecond += node.production
+  }
+
   switch (target.upgrade) {
     case 'level':
       ns.hacknet.upgradeLevel(target.index)
