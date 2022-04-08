@@ -4,8 +4,8 @@ import * as Config from './lib/config'
 /** @param {NS} main_ns **/
 export async function main(ns) {
   while (true) {
-    purchaseUpgrade(ns, findTargetByArray(ns))
-//    ns.tprintf(`${JSON.stringify(findTargetByArray(ns))}`)
+    // ns.tprintf(`${JSON.stringify(findTargetByArray(ns))}`)
+    purchaseUpgrade(ns, findTarget(ns))
     await ns.sleep(10)
   }
 }
@@ -19,6 +19,7 @@ function leastProducingNode(ns, nodeList) {
   return sortedList[0]
 }
 
+// slightly less shitty way to find target.
 function findTargetByArray(ns) {
   let nodeList = buildNodeList(ns)
   let target = leastProducingNode(ns, nodeList)
@@ -26,16 +27,18 @@ function findTargetByArray(ns) {
   target.upgrade = 'level'
   target.index = target.name.match(/^.*-(\d+)$/)[1]
 
-  for (let levels of Config.UpgradeLevels) {
-    if (target.level == levels[0]) {
-      if (target.ram <= levels[1]) {
-        target.upgrade = 'ram'
-      } else if (target.core <= levels[2]) {
-        target.upgrade = 'core'
-      }
-    }
-  }
+  // for (let levels of Config.UpgradeLevels) {
+  //   if (target.level == levels[0]) {
+  //     if (target.ram <= levels[1]) {
+  //       target.upgrade = 'ram'
+  //     }
 
+  //     if (target.core <= levels[2]) {
+  //       target.upgrade = 'core'
+  //     }
+  //   }
+  // }
+  // ns.tprintf(JSON.stringify(target))
   return target
 }
 

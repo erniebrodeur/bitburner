@@ -10,7 +10,7 @@ export async function main(ns) {
   let hosts = getAllHosts(ns).filter(function (value) {
     return (value != "home" && (options["with-hack-net"] || !value.startsWith("hacknet")))
   })
-  let hackingTarget = getTarget(ns, options = {})
+  let hackingTarget = getTarget(ns, options)
 
   for (let i in hosts) {
     let target = hosts[i]
@@ -98,7 +98,7 @@ function getTarget(ns, options) {
   let target = "n00dles"
 
   if (options.unparsed) {
-    target = options.unparsed
+    target = options.unparsed.join(" ")
   }
   return target
 }
