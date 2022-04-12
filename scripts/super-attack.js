@@ -1,12 +1,11 @@
 import optionParser from './lib/opt-parser'
+import * as Utils from "./lib/utils"
 
 /** @param {NS} ns **/
 export async function main(ns) {
   ns.disableLog("ALL")
   let options = optionParser(ns.args)
 
-  // let files = ns.ls("home", ".js")
-  let files = ['attack.js', 'weaken.js', 'grow.js', 'hack.js']
   let hosts = getAllHosts(ns).filter(function (value) {
     return (value != "home" && (options["with-hack-net"] || !value.startsWith("hacknet")))
   })
@@ -35,14 +34,13 @@ export async function main(ns) {
       ns.tprintf(`  doesn't have enough ram to run scripts, skipping`)
       continue
     }
+    await Utils.deployAttackFiles(ns, target)
 
-    await ns.scp(files, target)
     ns.killall(target)
     ns.tprintf(`  attacking ${hackingTarget}`)
     ns.exec('attack.js', target, 1, hackingTarget)
   }
 }
-
 
 export function autocomplete(data, args) {
   return [...data.servers]; // This script autocompletes the list of servers.
@@ -81,17 +79,13 @@ function getAllHosts(ns) {
   while (true) {
     let startingLength = hostList.length
     hostList.forEach(function (value) {
-      hostList = hostList.concat(ns.scan(value)).filter(onlyUnique)
+      hostList = hostList.concat(ns.scan(value)).filter(Utils.onlyUnique)
     })
     if (hostList.length == startingLength) {
       break
     }
   }
   return hostList
-}
-
-function onlyUnique(value, index, self) {
-  return self.indexOf(value) === index;
 }
 
 function getTarget(ns, options) {

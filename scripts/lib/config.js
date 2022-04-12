@@ -18,3 +18,5 @@ export let UpgradeLevels = [
   [90, 15 ** 2, 23],
   [95, 16 ** 2, 24]
 ]
+
+export let AttackFiles = ['attack.js', 'weaken.js', 'grow.js', 'hack.js']

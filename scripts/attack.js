@@ -1,20 +1,3 @@
-function callScript(ns, script, host, target, time) {
-  var ramCost = ns.getScriptRam(script, host)
-  var maxRam = ns.getServerMaxRam(host)
-  var usedRam = ns.getServerUsedRam(host)
-  var freeRam = maxRam - usedRam
-  var threadCount = Math.floor(freeRam / ramCost)
-
-  if (threadCount == 0) {
-    ns.print(`--- current script: ${script} not enough RAM for even a single thread.`)
-    return time
-  }
-  ns.print(`--- current script: ${script}, time to complete: ${ns.nFormat(time / 1000, '00:00:00')}, thread count: ${threadCount}`)
-  ns.exec(script, host, threadCount, target)
-
-  return time
-}
-
 /** @param {NS} ns **/
 export async function main(ns) {
   ns.disableLog("ALL")
@@ -30,14 +13,14 @@ export async function main(ns) {
   var iteration = 0
 
   // getScriptExpGain(script, host, args)	Get the exp gain of a script.
-  //  getScriptIncome(script, host, args)	Get the income of a script.
+  // getScriptIncome(script, host, args)	Get the income of a script.
 
   while (true) {
     currentSecurityLevel = ns.getServerSecurityLevel(target)
     ns.print("---------------------------------")
     ns.print(`--- current iteration: ${iteration}`)
     ns.print(`--- current security level: ${currentSecurityLevel.toFixed(2)}`)
-    ns.print(`--- current money: ${ns.nFormat(ns.getServerMoneyAvailable(target), '$00.00a')} of ${ns.nFormat(ns.getServerMaxMoney(target), '$00.00a')}`)
+    ns.print(`--- current money: ${ns.nFormat(ns.getServerMoneyAvailable(target), '$0.00a')} of ${ns.nFormat(ns.getServerMaxMoney(target), '$0.00a')}`)
 
 
     if (currentSecurityLevel > securityThresh) {
@@ -50,4 +33,25 @@ export async function main(ns) {
 
     iteration = iteration + 1
   }
+}
+
+function callScript(ns, script, host, target, time) {
+  var ramCost = ns.getScriptRam(script, host)
+  var maxRam = ns.getServerMaxRam(host)
+  var usedRam = ns.getServerUsedRam(host)
+  var freeRam = maxRam - usedRam
+  var threadCount = Math.floor(freeRam / ramCost)
+
+  if (threadCount == 0) {
+    ns.print(`--- current script: ${script} not enough RAM for even a single thread.`)
+    return time
+  }
+  ns.print(`--- current script: ${script}, runtime: ${ns.nFormat(time / 1000, '0:00:00')}, thread count: ${threadCount}`)
+  ns.exec(script, host, threadCount, target)
+
+  return time
+}
+
+export function autocomplete(data, args) {
+  return [...data.servers]; // This script autocompletes the list of servers.
 }

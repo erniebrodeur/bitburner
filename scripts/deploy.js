@@ -1,3 +1,5 @@
 export async function main(ns) {
-  await ns.scp(ns.ls("home", ".js"), ns.args[0])
+  let files = ['attack.js', 'weaken.js', 'grow.js', 'hack.js']
+
+  await ns.scp(files, ns.arg[0])
 }
